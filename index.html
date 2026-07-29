@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Newport Captain Academy — Daily Assignment</title>
+<style>
+:root{--bg:#09111f;--panel:#111c2f;--panel2:#17253d;--text:#f4f7fb;--muted:#aab6c8;--gold:#f4b942;--line:#2b3b56;--green:#59d39b}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:radial-gradient(circle at top right,#1b3557 0,#09111f 40%);color:var(--text);min-height:100vh}.shell{max-width:980px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:18px}.brand small{color:var(--gold);font-weight:800;letter-spacing:.12em;text-transform:uppercase}.brand h1{margin:4px 0 5px;font-size:clamp(30px,5vw,48px)}.muted{color:var(--muted)}.streak{background:rgba(17,28,47,.95);border:1px solid var(--line);border-radius:16px;padding:18px;min-width:180px;text-align:center}.streak strong{display:block;font-size:38px;color:var(--gold)}.progress{height:12px;background:#23334c;border-radius:999px;overflow:hidden;margin:18px 0 26px}.progress span{display:block;height:100%;width:0;background:var(--green);transition:.25s}.grid{display:grid;gap:14px}.card{background:rgba(17,28,47,.96);border:1px solid var(--line);border-radius:16px;padding:20px}.card.done{border-color:#39785e}.card h2{margin:0 0 8px;font-size:21px}.label{display:inline-block;color:var(--gold);font-size:12px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}.prompt{font-size:18px;line-height:1.55;margin:8px 0 16px}textarea{width:100%;min-height:115px;background:#0b1526;border:1px solid var(--line);border-radius:11px;color:var(--text);padding:13px;font:inherit;resize:vertical}.choices{display:grid;gap:9px}.choice{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:12px 14px;border-radius:10px;text-align:left;cursor:pointer;font-size:15px}.choice.correct{border-color:var(--green);background:#123426}.choice.wrong{border-color:#ff7b72;background:#3a1c22}.feedback{display:none;margin-top:12px;padding:12px;border-radius:10px;background:#0d1728;color:#dbe5f3;line-height:1.45}.feedback.show{display:block}.actions{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:14px}.btn{border:0;border-radius:10px;padding:11px 15px;font-weight:800;cursor:pointer;background:var(--gold);color:#17120a}.check{font-weight:800;color:var(--green)}.footer{color:var(--muted);font-size:12px;margin:25px 0 8px;line-height:1.5}@media(max-width:650px){.shell{padding:16px}.top{flex-direction:column}.streak{width:100%;text-align:left}.actions{align-items:stretch;flex-direction:column}.btn{width:100%}}
+</style>
+</head>
+<body><main class="shell">
+<div class="top"><div class="brand"><small>Newport Fire/EMS</small><h1>Today’s Captain Assignment</h1><div class="muted" id="dateLine"></div></div><div class="streak"><strong id="streak">0</strong><span class="muted">day streak</span><div id="completeCount" style="margin-top:8px">0 of 4 complete</div></div></div>
+<div class="progress"><span id="bar"></span></div>
+<section class="grid">
+<div class="card" id="sogCard"><span class="label">SOG Question</span><h2>Policy Recall</h2><div class="prompt" id="sogQuestion"></div><div class="choices" id="sogChoices"></div><div class="feedback" id="sogFeedback"></div></div>
+<div class="card" id="fireCard"><span class="label">Fireground Decision</span><h2>You Are Battalion 952</h2><div class="prompt" id="firePrompt"></div><textarea id="fireAnswer" placeholder="Give your initial report, establish command, state strategy, and assign incoming companies..."></textarea><div class="actions"><span id="fireStatus" class="muted">Not completed</span><button class="btn" onclick="completeWritten('fire')">Mark Complete</button></div></div>
+<div class="card" id="personnelCard"><span class="label">Personnel Encounter</span><h2>Captain’s Conversation</h2><div class="prompt" id="personnelPrompt"></div><textarea id="personnelAnswer" placeholder="How would you open the conversation, gather facts, set expectations, document, and follow up?"></textarea><div class="actions"><span id="personnelStatus" class="muted">Not completed</span><button class="btn" onclick="completeWritten('personnel')">Mark Complete</button></div></div>
+<div class="card" id="oralCard"><span class="label">Oral Board</span><h2>Two-Minute Response</h2><div class="prompt" id="oralPrompt"></div><textarea id="oralAnswer" placeholder="Outline your opening, three main points, and closing..."></textarea><div class="actions"><span id="oralStatus" class="muted">Not completed</span><button class="btn" onclick="completeWritten('oral')">Mark Complete</button></div></div>
+</section>
+<div class="footer">Your answers and streak are saved only in this browser. This is a training aid; verify policy language against current Newport Fire/EMS SOGs, agreements, general orders, and command direction.</div>
+</main>
+<script>
+const sogs=[
+{q:'After a MAYDAY is declared, where should the MAYDAY operation remain?',c:['On the initial fireground channel','Move immediately to Channel 15','Move to dispatch','Move to a mutual-aid channel'],a:0,e:'The MAYDAY remains on the initial fireground channel. Other incident traffic is moved so the distressed firefighter does not have to change channels.'},
+{q:'What radio format should be used for a concise command report?',c:['UCAN: Units, Conditions, Actions, Needs','LUNAR','CAN only','Location, Assignment, Benchmark'],a:0,e:'Newport command practice uses UCAN: Units, Conditions, Actions, and Needs.'},
+{q:'What staffing concept applies to the Initial Rapid Intervention Crew?',c:['Two-in/two-out','One-in/one-out','Four-in/two-out','Two-in/one-out'],a:0,e:'IRIC operations are based on the two-in/two-out requirement.'},
+{q:'What should the second-due apparatus address at a structure fire unless command directs otherwise?',c:['Water supply','Primary search','Command transfer','Medical group'],a:0,e:'The second apparatus is expected to address water supply unless reassigned by command.'},
+{q:'Where should non-MAYDAY fireground traffic move after a MAYDAY?',c:['Channel 15','Dispatch','Remain on the original channel','Any channel selected by the first company'],a:0,e:'The MAYDAY stays on the original fireground channel while other incident traffic moves to Channel 15.'},
+{q:'Within 24 hours of the start of a shift, how must a leave request be made?',c:['Directly to the OIC','Written on the vacation calendar only','Through another firefighter','By voicemail'],a:0,e:'Within 24 hours, the request must be made directly to the OIC.'}
+];
+const fires=[
+'Engine 901 reports a two-story residential structure with smoke showing from the second floor. A neighbor reports one occupant may still be inside. Give your initial command report and your first assignments for the incoming alarm companies.',
+'You arrive at a three-story ordinary-construction apartment building with fire showing from a rear second-floor window. Several occupants are on balconies. Explain your strategy, priorities, and company assignments.',
+'Engine 901 reports heavy smoke from a commercial occupancy after hours. The alarm company advises a possible employee still inside. Describe your command structure, initial strategy, and resource needs.',
+'During an offensive residential fire, a firefighter transmits a MAYDAY after becoming separated from the hoseline. Explain your immediate radio actions, command priorities, RIC deployment, and accountability steps.',
+'Crews are operating in a basement fire when conditions rapidly worsen and the first floor becomes unstable. Explain how you would order the evacuation, confirm accountability, and reset the incident strategy.'
+];
+const personnel=[
+'A strong firefighter has reported late four times this month. No prior formal discipline exists. Conduct the captain-level conversation.',
+'Two firefighters separately give you conflicting accounts of an argument that occurred in front of the crew. Explain how you investigate and resolve it.',
+'A firefighter’s performance has slipped, and coworkers say the member appears exhausted and withdrawn. Explain how you address performance while also checking on the member’s well-being.',
+'A citizen complains that a crew member was dismissive and unprofessional during a medical call. Explain your fact-finding, coaching, notifications, and follow-up.',
+'A usually reliable firefighter violates a clear uniform standard after already receiving an informal reminder. Explain your next steps.'
+];
+const oral=[
+'What does servant leadership mean to you as a captain?',
+'How would you build accountability without creating a culture of fear?',
+'What is the captain’s role in developing future officers?',
+'How would you improve communication between shifts and stations?',
+'Why should Newport select you for captain?',
+'How do you balance supporting your firefighters with enforcing department expectations?'
+];
+const today=new Date();
+const key=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+const seed=Number(key.replaceAll('-',''));
+const pick=(arr,offset)=>arr[(seed+offset)%arr.length];
+const dailyKey='ncaDaily-'+key;
+let state=JSON.parse(localStorage.getItem(dailyKey)||'{"sog":false,"fire":false,"personnel":false,"oral":false}');
+const sog=pick(sogs,0);document.getElementById('dateLine').textContent=today.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'});document.getElementById('sogQuestion').textContent=sog.q;
+const order=sog.c.map((text,i)=>({text,correct:i===sog.a})).sort((a,b)=>((seed+a.text.length)%17)-((seed+b.text.length)%17));
+order.forEach(x=>{const b=document.createElement('button');b.className='choice';b.textContent=x.text;b.onclick=()=>answerSog(b,x.correct);document.getElementById('sogChoices').appendChild(b)});
+document.getElementById('firePrompt').textContent=pick(fires,1);document.getElementById('personnelPrompt').textContent=pick(personnel,2);document.getElementById('oralPrompt').textContent=pick(oral,3);
+['fire','personnel','oral'].forEach(x=>{document.getElementById(x+'Answer').value=localStorage.getItem(dailyKey+'-'+x)||''});
+function answerSog(btn,correct){if(state.sog)return;document.querySelectorAll('.choice').forEach(x=>x.disabled=true);if(correct)btn.classList.add('correct');else{btn.classList.add('wrong');document.querySelectorAll('.choice').forEach((x,i)=>{if(order[i].correct)x.classList.add('correct')})}const f=document.getElementById('sogFeedback');f.className='feedback show';f.innerHTML='<strong>'+(correct?'Correct.':'Review this one.')+'</strong><br>'+sog.e;state.sog=true;save();}
+function completeWritten(type){const value=document.getElementById(type+'Answer').value.trim();if(value.length<15){alert('Give yourself a real practice rep first—write at least a sentence or a short outline.');return}localStorage.setItem(dailyKey+'-'+type,value);state[type]=true;save();}
+function save(){localStorage.setItem(dailyKey,JSON.stringify(state));update();}
+function update(){const count=Object.values(state).filter(Boolean).length;document.getElementById('completeCount').textContent=count+' of 4 complete';document.getElementById('bar').style.width=(count*25)+'%';['sog','fire','personnel','oral'].forEach(x=>{if(state[x]){document.getElementById(x+'Card').classList.add('done');if(x!=='sog'){document.getElementById(x+'Status').textContent='Complete';document.getElementById(x+'Status').className='check'}}});if(count===4)updateStreak();}
+function updateStreak(){const stored=JSON.parse(localStorage.getItem('ncaStreak')||'{"count":0,"last":""}');if(stored.last===key){document.getElementById('streak').textContent=stored.count;return}const yesterday=new Date(today);yesterday.setDate(today.getDate()-1);const ykey=yesterday.getFullYear()+'-'+String(yesterday.getMonth()+1).padStart(2,'0')+'-'+String(yesterday.getDate()).padStart(2,'0');stored.count=stored.last===ykey?stored.count+1:1;stored.last=key;localStorage.setItem('ncaStreak',JSON.stringify(stored));document.getElementById('streak').textContent=stored.count;}
+const st=JSON.parse(localStorage.getItem('ncaStreak')||'{"count":0,"last":""}');document.getElementById('streak').textContent=st.count;update();
+</script></body></html>
