@@ -47,3 +47,4 @@ startWritten=function(t){wtype=t;witem=W[t][Math.floor(Math.random()*W[t].length
           git add index.html
           git diff --cached --quiet || git commit -m "Apply officer assessment frameworks and oral rubric"
           git push
+# retrigger 2026-07-31
