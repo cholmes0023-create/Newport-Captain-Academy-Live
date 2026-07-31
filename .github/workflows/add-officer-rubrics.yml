@@ -1,0 +1,49 @@
+name: Add Officer Assessment Rubrics
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/add-officer-rubrics.yml'
+permissions:
+  contents: write
+jobs:
+  patch-academy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add assessment frameworks and oral rubric
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          if '.rubric-info{' not in s:
+              s=s.replace('.footer{font-size:12px', '.rubric-info{background:#0b1526;border:1px solid var(--line);padding:14px;border-radius:10px;margin:12px 0;line-height:1.5}.footer{font-size:12px')
+          s=s.replace('<div class="prompt" id="writtenPrompt"></div><textarea', '<div class="prompt" id="writtenPrompt"></div><div class="rubric-info" id="framework"></div><textarea')
+          addon=r'''// Officer-assessment answer frameworks and oral grading rubric.
+W.oral=[
+{p:'Why should Newport select you for captain?',model:'Open with a direct answer. Preview two or three reasons. Connect your experience and values to Newport. Give a specific example that proves your leadership. Explain how you will develop firefighters, maintain standards, follow through and serve the community. Close by restating your readiness and commitment.',r:[['Direct opening and position',['newport should select','i am ready','as captain']],['Organized roadmap',['first','second','finally','three']],['Leadership dimensions',['leadership','judgment','communication','accountability']],['Concrete example and result',['for example','when i','result','outcome']],['Newport connection',['newport','community','department']],['Crew development and standards',['develop','mentor','coach','standards']],['What, how and why reasoning',['because','how','why']],['Follow-through and future impact',['follow up','future','improve','impact']],['Confident closing',['ready to serve','commitment','select me']]]},
+{p:'How would you build accountability without creating a culture of fear?',model:'Define accountability and preview your approach. Explain that you will model expectations, communicate standards, coach early, correct privately, apply policy consistently, recognize strong work, document fairly and follow up. Give a practical example. Close by connecting fair accountability to trust, readiness and public service.',r:[['Clear definition and opening',['accountability means','define','to me']],['Organized roadmap',['first','second','finally','three']],['Model the standard',['model','example','myself']],['Clear expectations and communication',['expectation','standard','communicat']],['Coach early and correct privately',['coach','private','one-on-one']],['Consistency and fairness',['consistent','fair']],['Recognition and development',['recognize','praise','develop']],['Documentation and follow-up',['document','follow up','follow-up']],['Practical example',['for example','scenario','when i']],['Strong closing tied to mission',['trust','readiness','public','community']]]},
+{p:'What does servant leadership mean to you as a captain?',model:'Define servant leadership without sounding passive. Explain how a captain removes obstacles, equips people, listens, develops firefighters and puts the mission and crew ahead of ego while still enforcing standards. Give a real example and close by linking service, accountability and trust.',r:[['Clear definition',['servant leadership means','define']],['Service while maintaining authority',['serve','standards','accountability']],['Listen and understand',['listen','understand']],['Remove obstacles and provide resources',['obstacle','resource','support']],['Develop firefighters',['develop','mentor','coach']],['Mission before ego',['mission','ego','crew']],['Concrete example',['for example','when i']],['What, how and why reasoning',['how','why','because']],['Strong closing',['trust','readiness','community']]]},
+{p:'How would you improve communication between shifts and stations?',model:'State the communication problem you are solving, then preview your plan. Explain standard pass-down expectations, face-to-face communication when possible, written documentation, confirmation of critical information, accountability for follow-through and periodic evaluation. Give an example and close with the effect on readiness, trust and service.',r:[['Clear opening and problem',['communication','problem','improve']],['Organized roadmap',['first','second','finally','plan']],['Standardized pass-down',['pass down','pass-down','shift change']],['Multiple communication methods',['face-to-face','written','email','log']],['Confirmation and accountability',['confirm','accountability','responsible']],['Follow-through and evaluation',['follow up','evaluate','review']],['Concrete example',['for example','when i']],['Mission impact',['readiness','trust','service','community']],['Confident close',['commitment','consistent','improve']]]}
+];
+const answerFrameworks={
+fire:'<strong>Fire scenario framework:</strong> Size-up and UCAN → establish command → declare strategy → state life-safety priorities → assign companies → address water supply and accountability/RIC → request progress reports → reassess conditions → state resource needs and follow-through.',
+personnel:'<strong>Personnel framework:</strong> Meet privately → state documented facts → listen and investigate → explain operational impact → review policy and expectations → support, coach or correct → identify consequences → document → notify the chain when required → follow up.',
+oral:'<strong>Officer oral-answer framework:</strong> State your position → preview two or three main points → explain what you would do, how you would do it and why → demonstrate leadership dimensions → give a concrete example and result → include follow-through → close confidently. Assessors can only score behaviors you clearly verbalize.'
+};
+startWritten=function(t){wtype=t;witem=W[t][Math.floor(Math.random()*W[t].length)];const names={fire:['Fire Scenario','Command Response'],personnel:['Personnel Encounter',"Captain's Conversation"],oral:['Oral Answer','Officer-Level Response']};document.getElementById('writtenTag').textContent=names[t][0];document.getElementById('writtenTitle').textContent=names[t][1];document.getElementById('writtenPrompt').textContent=witem.p;document.getElementById('writtenAnswer').value='';document.getElementById('writtenFeedback').className='feedback';const f=document.getElementById('framework');if(f)f.innerHTML=answerFrameworks[t];document.getElementById('rubric').innerHTML='';witem.r.forEach((r,i)=>{document.getElementById('rubric').innerHTML+=`<label><input type="checkbox" class="rcheck" value="${i}"> I intentionally included: ${r[0]}</label>`});show('written')};
+'''
+          marker='save();</script>'
+          if 'Officer-assessment answer frameworks and oral grading rubric.' not in s:
+              s=s.replace(marker,addon+marker)
+          s=s.replace('Written exercises use structured rubric scoring, not human or AI semantic grading.', 'Written exercises use structured observable-behavior rubrics. Oral answers are graded on organization, leadership, explicit reasoning, examples, follow-through and closing—not on thoughts left unsaid.')
+          p.write_text(s)
+          PY
+      - name: Commit updated academy
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Apply officer assessment frameworks and oral rubric"
+          git push
